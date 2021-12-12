@@ -19,6 +19,7 @@ remove
 #include <unordered_set>
 #include <vector>
 #include <memory>
+#include <iterator>
 
 template<typename Virus>
 class Vertex
@@ -45,6 +46,40 @@ class VirusGenealogy
         }
 
         Virus::id_type get_stem_id() const { return stem_id; }
+
+        class children_iterator {
+        public:
+            using iterator_category = std::bidirectional_iterator_tag;
+            using difference_type   = std::ptrdiff_t;
+            using value_type        = Virus;
+            using pointer           = std::unordered_set<std::shared_ptr<Vertex<Virus>>>::iterator;
+            using reference         = Virus&;
+
+            children_iterator() = default;
+            explicit children_iterator(typename std::unordered_set<std::shared_ptr<Vertex<Virus>>>::iterator _it) {
+                it = _it;
+            }
+            reference operator*() const { return *((*it)->virus);}
+            pointer operator->() { return it; }
+            children_iterator& operator++() { it++; return *this; }
+            children_iterator operator++(int) { children_iterator tmp = *this; ++(*this); return tmp; }
+            children_iterator& operator--() { it--; return *this; }
+            children_iterator operator--(int) { children_iterator tmp = *this; --(*this); return tmp; }
+            friend bool operator== (const children_iterator& a, const children_iterator& b) { return a.it == b.it; };
+            friend bool operator!= (const children_iterator& a, const children_iterator& b) { return a.it != b.it; };
+        private:
+            typename std::unordered_set<std::shared_ptr<Vertex<Virus>>>::iterator it;
+        };
+
+        // bez wyjatkow
+        VirusGenealogy<Virus>::children_iterator get_children_begin(Virus::id_type const &id) const {
+            return children_iterator(graph.at(id)->children.begin());
+        }
+
+        // bez wyjatkow
+        VirusGenealogy<Virus>::children_iterator get_children_end(Virus::id_type const &id) const {
+            return children_iterator(graph.at(id)->children.end());
+        }
 
         bool exists(Virus::id_type const &id) const
         {
