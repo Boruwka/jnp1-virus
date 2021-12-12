@@ -44,6 +44,8 @@ class VirusGenealogy
             this->stem_id = stem_id;
         }
 
+        Virus::id_type get_stem_id() const { return stem_id; }
+
         bool exists(Virus::id_type const &id) const
         {
             return graph.contains(id);
