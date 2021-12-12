@@ -5,7 +5,6 @@ get_children_begin
 get_children_end
 connect
 wyjątki
-
 Jagoda:
 exists
 operator[]
@@ -148,10 +147,7 @@ class VirusGenealogy
             }
         }
 
-        // Usuwa wirus o podanym identyfikatorze.
-        // Zgłasza wyjątek VirusNotFound, jeśli żądany wirus nie istnieje.
-        // Zgłasza wyjątek TriedToRemoveStemVirus przy próbie usunięcia
-        // wirusa macierzystego.
+        
         void remove(Virus::id_type const &id)
         {
             if (id == stem_id)
@@ -163,7 +159,10 @@ class VirusGenealogy
             {
                 // rzucenie virus not found
             }
-            // trzeba usunąć go u wszystkich jego rodziców przechodząc po secie parents i u nich usunąć go z seta, potem to dokończę
+            for (auto parent: (search->second->parents))
+            {
+                parent->children.erase(id);
+            }
             graph.erase(id);
             
         }
