@@ -20,6 +20,23 @@ remove
 #include <memory>
 #include <iterator>
 
+struct VirusNotFound : public std::exception {
+    const char* what() const throw() {
+        return "VirusNotFound";
+    }
+};
+
+struct VirusAlreadyCreated : public std::exception {
+    const char* what() const throw() {
+        return "VirusAlreadyCreated";
+    }
+};
+
+struct TriedToRemoveStemVirus : public std::exception {
+    const char* what() const throw() {
+        return "TriedToRemoveStemVirus";
+    }
+};
 
 template<typename Virus>
 class Vertex
@@ -39,7 +56,6 @@ public:
     void insert_parent(std::shared_ptr<Vertex<Virus>> parent) {
         parents.insert(parent);
     }
-
 };
 
 template <typename Virus>
@@ -78,14 +94,20 @@ public:
         typename std::unordered_set<std::shared_ptr<Vertex<Virus>>>::iterator it;
     };
 
-    // bez wyjatkow
     VirusGenealogy<Virus>::children_iterator get_children_begin(Virus::id_type const &id) const {
-        return children_iterator(graph.at(id)->children.begin());
+        try {
+            return children_iterator(graph.at(id)->children.begin());
+        } catch (const std::out_of_range e) {
+            throw VirusNotFound();
+        }
     }
 
-    // bez wyjatkow
     VirusGenealogy<Virus>::children_iterator get_children_end(Virus::id_type const &id) const {
-        return children_iterator(graph.at(id)->children.end());
+        try {
+            return children_iterator(graph.at(id)->children.end());
+        } catch (const std::out_of_range e) {
+            throw VirusNotFound();
+        }
     }
 
     bool exists(Virus::id_type const &id) const
@@ -162,7 +184,7 @@ public:
             child_vertex->insert_parent(parent_vertex);
             parent_vertex->insert_child(child_vertex);
         } catch (const std::out_of_range e) {
-            // throw VirusNotFound
+            throw VirusNotFound();
         }
 
     }
