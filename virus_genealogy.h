@@ -200,7 +200,7 @@ public:
         }
         for (auto parent: (search->second->parents))
         {
-            parent->children.erase(id);
+            parent->children.erase(search->second);
         }
         graph.erase(id);
 
