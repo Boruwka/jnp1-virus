@@ -124,8 +124,7 @@ public:
         }
         else
         {
-            // tutaj rzucenie wyjątku Virus Not Found, ale jeszcze nwm jak
-            // to miejsce daje warninga przy kompilacji, bo jeszcze nie ma wyjątku
+            throw VirusNotFound();
         }
     }
 
@@ -145,7 +144,7 @@ public:
         }
         else
         {
-            // tutaj też powinien być virus not found, to jest jeszcze do zrobienia
+            throw VirusNotFound();
         }
     }
 
@@ -155,11 +154,10 @@ public:
         auto search = this->graph.find(id);
         if (search != this->graph.end())
         {
-            // rzucenie virus already craeted
+            throw VirusAlreadyCreated();
         }
         graph.insert({id, std::make_shared<Vertex<Virus>>(id)});
-        connect(id, parent_id);
-        // tu chyba jakieś try catch, ale to potem
+        connect(id, parent_id); // czy tu trzeba robić try catch?
     }
 
     void create(typename Virus::id_type const &id, std::vector<typename Virus::id_type> const &parent_ids)
@@ -167,13 +165,13 @@ public:
         auto search = this->graph.find(id);
         if (search != this->graph.end())
         {
-            // rzucenie virus already craeted
+            throw VirusAlreadyCreated();
         }
         graph.insert({id, std::make_shared<Vertex<Virus>>(id)});
         for (auto parent_id: parent_ids)
         {
             connect(id, parent_id);
-            // tu chyba jakieś try catch, ale to potem
+            // czy tu trzeba robić try catch?
         }
     }
 
@@ -193,12 +191,12 @@ public:
     {
         if (id == stem_id)
         {
-            // rzucenie tried to remove stem virus
+            throw TriedToRemoveStemVirus();
         }
         auto search = this->graph.find(id);
         if (search == this->graph.end())
         {
-            // rzucenie virus not found
+            throw VirusNotFound();
         }
         for (auto parent: (search->second->parents))
         {
