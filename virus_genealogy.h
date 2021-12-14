@@ -70,6 +70,10 @@ public:
 
     Virus::id_type get_stem_id() const { return stem_id; }
 
+    VirusGenealogy(const VirusGenealogy&) = delete; // blokowanie konstruktora kopiującego
+
+    VirusGenealogy& operator=(const VirusGenealogy&) = delete; //blokowanie operatora przypisania
+
     class children_iterator {
     public:
         using iterator_category = std::bidirectional_iterator_tag;
