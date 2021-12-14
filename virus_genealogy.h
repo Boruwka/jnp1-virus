@@ -13,6 +13,9 @@ create
 remove
 */
 
+#ifndef __VIRUS_GENEALOGY_H__
+#define __VIRUS_GENEALOGY_H__
+
 
 #include <unordered_map>
 #include <unordered_set>
@@ -228,3 +231,5 @@ private:
     std::unordered_map<typename Virus::id_type, std::shared_ptr<Vertex<Virus>>> graph;
     typename Virus::id_type stem_id;
 };
+
+#endif
