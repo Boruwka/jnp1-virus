@@ -97,7 +97,7 @@ public:
     VirusGenealogy<Virus>::children_iterator get_children_begin(Virus::id_type const &id) const {
         try {
             return children_iterator(graph.at(id)->children.begin());
-        } catch (const std::out_of_range e) {
+        } catch (const std::out_of_range &e) {
             throw VirusNotFound();
         }
     }
@@ -105,7 +105,7 @@ public:
     VirusGenealogy<Virus>::children_iterator get_children_end(Virus::id_type const &id) const {
         try {
             return children_iterator(graph.at(id)->children.end());
-        } catch (const std::out_of_range e) {
+        } catch (const std::out_of_range &e) {
             throw VirusNotFound();
         }
     }
@@ -181,7 +181,7 @@ public:
             auto parent_vertex = graph.at(parent_id);
             child_vertex->insert_parent(parent_vertex);
             parent_vertex->insert_child(child_vertex);
-        } catch (const std::out_of_range e) {
+        } catch (const std::out_of_range &e) {
             throw VirusNotFound();
         }
 
