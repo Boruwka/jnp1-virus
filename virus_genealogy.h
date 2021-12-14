@@ -187,23 +187,36 @@ public:
 
     }
 
+    // void remove_single_vertex(std::unordered_map<typename Virus::id_type, std::shared_ptr<Vertex<Virus>>>::const_iterator search) i wtedy wszędzie zamiast vertex to search->second
+    void remove_single_vertex(std::shared_ptr<Vertex<Virus>> vertex)
+    {
+        for (auto parent: (vertex->parents))
+        {
+            parent->children.erase(vertex);
+        }
+        for (auto child: (vertex->children))
+        {
+            child->parents.erase(vertex);
+            if (child->parents.size() == 0)
+            {
+                remove_single_vertex(child);
+            }
+        }
+        graph.erase(vertex->virus->get_id());
+    }
+
     void remove(Virus::id_type const &id)
     {
         if (id == stem_id)
         {
             throw TriedToRemoveStemVirus();
-        }
-        auto search = this->graph.find(id);
+        } 
+        auto search = this->graph.find(id); 
         if (search == this->graph.end())
         {
             throw VirusNotFound();
         }
-        for (auto parent: (search->second->parents))
-        {
-            parent->children.erase(search->second);
-        }
-        graph.erase(id);
-
+        remove_single_vertex(search->second);
     }
 
 
