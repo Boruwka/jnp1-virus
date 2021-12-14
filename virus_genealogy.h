@@ -163,6 +163,10 @@ public:
         {
             throw VirusAlreadyCreated();
         }
+        if (!exists(parent_id))
+        {
+            throw VirusNotFound();
+        }
         graph.insert({id, std::make_shared<Vertex<Virus>>(id)});
         connect(id, parent_id); // czy tu trzeba robić try catch?
     }
@@ -174,11 +178,17 @@ public:
         {
             throw VirusAlreadyCreated();
         }
+        for (auto parent_id: parent_ids)
+        {
+            if (!exists(parent_id))
+            {
+                throw VirusNotFound();
+            }
+        }
         graph.insert({id, std::make_shared<Vertex<Virus>>(id)});
         for (auto parent_id: parent_ids)
         {
             connect(id, parent_id);
-            // czy tu trzeba robić try catch?
         }
     }
 
