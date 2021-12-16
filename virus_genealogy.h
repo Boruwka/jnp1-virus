@@ -26,7 +26,7 @@ public:
         this->stem_id = stem_id;
     }
 
-    ~VirusGenealogy() {
+    ~VirusGenealogy() noexcept {
         for (auto v : this->graph) {
             v.second->children.clear();
             v.second->parents.clear();
