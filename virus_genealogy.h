@@ -139,9 +139,7 @@ public:
 
     void create(typename Virus::id_type const &id, Virus::id_type const &parent_id)
     {
-
-        auto search = this->graph.find(id);
-        if (search != this->graph.end())
+        if (exists(id))
         {
             throw VirusAlreadyCreated();
         }
@@ -150,7 +148,7 @@ public:
             throw VirusNotFound();
         }
         graph.insert({id, std::make_shared<Vertex<Virus>>(id)});
-        connect(id, parent_id); // czy tu trzeba robić try catch?
+        connect(id, parent_id);
     }
 
     void create(typename Virus::id_type const &id, std::vector<typename Virus::id_type> const &parent_ids)
