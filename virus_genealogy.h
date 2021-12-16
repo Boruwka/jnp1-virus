@@ -125,18 +125,14 @@ public:
     std::vector<typename Virus::id_type> get_parents(typename Virus::id_type const &id) const
     {
         std::vector<typename Virus::id_type> parents_vector;
-        auto search = this->graph.find(id);
-        if (search != graph.end())
-        {
-            for (auto parent: (search->second->parents))
+        try {
+            auto v = graph.at(id);
+            for (auto parent : (v->parents))
             {
                 parents_vector.push_back((*parent->get_virus()).get_id());
             }
             return parents_vector;
-
-        }
-        else
-        {
+        } catch (const std::out_of_range &e) {
             throw VirusNotFound();
         }
     }
