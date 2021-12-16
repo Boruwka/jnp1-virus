@@ -153,8 +153,7 @@ public:
 
     void create(typename Virus::id_type const &id, std::vector<typename Virus::id_type> const &parent_ids)
     {
-        auto search = this->graph.find(id);
-        if (search != this->graph.end())
+        if (exists(id))
         {
             throw VirusAlreadyCreated();
         }
