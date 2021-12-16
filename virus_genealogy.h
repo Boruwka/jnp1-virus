@@ -59,6 +59,10 @@ public:
     void insert_parent(std::shared_ptr<Vertex<Virus>> parent) {
         parents.insert(parent);
     }
+    void clear_all() {
+        children.clear();
+        parents.clear();
+    }
 };
 
 template <typename Virus>
@@ -69,6 +73,12 @@ public:
     {
         graph.insert({stem_id, std::make_shared<Vertex<Virus>>(stem_id)});
         this->stem_id = stem_id;
+    }
+
+    ~VirusGenealogy() {
+        for (auto v : graph) {
+            v.second->clear_all();
+        }
     }
 
     Virus::id_type get_stem_id() const { return stem_id; }
@@ -227,8 +237,8 @@ public:
         if (id == stem_id)
         {
             throw TriedToRemoveStemVirus();
-        } 
-        auto search = this->graph.find(id); 
+        }
+        auto search = this->graph.find(id);
         if (search == this->graph.end())
         {
             throw VirusNotFound();
