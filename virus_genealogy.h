@@ -93,7 +93,7 @@ public:
         using difference_type   = std::ptrdiff_t;
         using value_type        = Virus;
         using pointer           = std::shared_ptr<Virus>;
-        using reference         = Virus&;
+        using reference         = const Virus&;
 
         children_iterator() = default;
         explicit children_iterator(typename std::unordered_set<std::shared_ptr<Vertex<Virus>>>::iterator _it) {
