@@ -1,21 +1,5 @@
-/* Do zrobienia:
-Karolina:
-get_steam_id
-get_children_begin
-get_children_end
-connect
-wyjątki
-Jagoda:
-exists
-operator[]
-get_parents
-create
-remove
-*/
-
 #ifndef __VIRUS_GENEALOGY_H__
 #define __VIRUS_GENEALOGY_H__
-
 
 #include <unordered_map>
 #include <unordered_set>
@@ -44,25 +28,21 @@ struct TriedToRemoveStemVirus : public std::exception {
 template<typename Virus>
 class Vertex
 {
-public:
+private:
     std::shared_ptr<Virus> virus;
+public:
+
     Vertex(Virus::id_type const &stem_id)
     {
         virus = std::make_shared<Virus>(stem_id);
     }
+
+    std::shared_ptr<Virus> get_virus() {
+        return virus;
+    }
+
     std::unordered_set<std::shared_ptr<Vertex<Virus>>> children;
     std::unordered_set<std::shared_ptr<Vertex<Virus>>> parents;
-
-    void insert_child(std::shared_ptr<Vertex<Virus>> child) {
-        children.insert(child);
-    }
-    void insert_parent(std::shared_ptr<Vertex<Virus>> parent) {
-        parents.insert(parent);
-    }
-    void clear_all() {
-        children.clear();
-        parents.clear();
-    }
 };
 
 template <typename Virus>
@@ -77,15 +57,16 @@ public:
 
     ~VirusGenealogy() {
         for (auto v : graph) {
-            v.second->clear_all();
+            v.second->children.clear();
+            v.second->parents.clear();
         }
     }
 
     Virus::id_type get_stem_id() const { return stem_id; }
 
-    VirusGenealogy(const VirusGenealogy&) = delete; // blokowanie konstruktora kopiującego
+    VirusGenealogy(const VirusGenealogy&) = delete;
 
-    VirusGenealogy& operator=(const VirusGenealogy&) = delete; //blokowanie operatora przypisania
+    VirusGenealogy& operator=(const VirusGenealogy&) = delete;
 
     class children_iterator {
     public:
@@ -99,8 +80,8 @@ public:
         explicit children_iterator(typename std::unordered_set<std::shared_ptr<Vertex<Virus>>>::iterator _it) {
             it = _it;
         }
-        reference operator*() const { return *((*it)->virus);}
-        pointer operator->() { return (*it)->virus; }
+        reference operator*() const { return *((*it)->get_virus());}
+        pointer operator->() { return (*it)->get_virus(); }
         children_iterator& operator++() { it++; return *this; }
         children_iterator operator++(int) { children_iterator tmp = *this; ++(*this); return tmp; }
         children_iterator& operator--() { it--; return *this; }
@@ -134,17 +115,12 @@ public:
 
     const Virus& operator[](typename Virus::id_type const &id) const
     {
-        auto search = this->graph.find(id);
-        if (search != graph.end())
-        {
-            return *(search->second->virus);
-        }
-        else
-        {
+        try {
+            return *(this->graph.at(id)->get_virus());
+        } catch (const std::out_of_range &e) {
             throw VirusNotFound();
         }
     }
-
 
     std::vector<typename Virus::id_type> get_parents(typename Virus::id_type const &id) const
     {
@@ -154,7 +130,7 @@ public:
         {
             for (auto parent: (search->second->parents))
             {
-                parents_vector.push_back((*parent->virus).get_id());
+                parents_vector.push_back((*parent->get_virus()).get_id());
             }
             return parents_vector;
 
@@ -206,30 +182,12 @@ public:
         try {
             auto child_vertex = graph.at(child_id);
             auto parent_vertex = graph.at(parent_id);
-            child_vertex->insert_parent(parent_vertex);
-            parent_vertex->insert_child(child_vertex);
+            child_vertex->parents.insert(parent_vertex);
+            parent_vertex->children.insert(child_vertex);
         } catch (const std::out_of_range &e) {
             throw VirusNotFound();
         }
 
-    }
-
-    // void remove_single_vertex(std::unordered_map<typename Virus::id_type, std::shared_ptr<Vertex<Virus>>>::const_iterator search) i wtedy wszędzie zamiast vertex to search->second
-    void remove_single_vertex(std::shared_ptr<Vertex<Virus>> vertex)
-    {
-        for (auto parent: (vertex->parents))
-        {
-            parent->children.erase(vertex);
-        }
-        for (auto child: (vertex->children))
-        {
-            child->parents.erase(vertex);
-            if (child->parents.size() == 0)
-            {
-                remove_single_vertex(child);
-            }
-        }
-        graph.erase(vertex->virus->get_id());
     }
 
     void remove(Virus::id_type const &id)
@@ -250,6 +208,23 @@ public:
 private:
     std::unordered_map<typename Virus::id_type, std::shared_ptr<Vertex<Virus>>> graph;
     typename Virus::id_type stem_id;
+
+    void remove_single_vertex(std::shared_ptr<Vertex<Virus>> vertex)
+    {
+        for (auto parent: (vertex->parents))
+        {
+            parent->children.erase(vertex);
+        }
+        for (auto child: (vertex->children))
+        {
+            child->parents.erase(vertex);
+            if (child->parents.size() == 0)
+            {
+                remove_single_vertex(child);
+            }
+        }
+        graph.erase(vertex->get_virus()->get_id());
+    }
 };
 
 #endif
