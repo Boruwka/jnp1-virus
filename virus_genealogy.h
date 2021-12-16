@@ -7,10 +7,8 @@
 #include <memory>
 #include <iterator>
 
-struct VirusNotFound : public std::exception {
-    const char* what() const throw() {
-        return "VirusNotFound";
-    }
+struct VirusNotFound : public std::out_of_range {
+    VirusNotFound(): std::out_of_range("VirusNotFound"){};
 };
 
 struct VirusAlreadyCreated : public std::exception {
@@ -189,12 +187,11 @@ public:
         {
             throw TriedToRemoveStemVirus();
         }
-        auto search = this->graph.find(id);
-        if (search == this->graph.end())
-        {
+        try {
+            remove_single_vertex(this->graph.at(id));
+        } catch (const std::out_of_range &e) {
             throw VirusNotFound();
         }
-        remove_single_vertex(search->second);
     }
 
 
