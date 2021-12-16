@@ -23,42 +23,41 @@ struct TriedToRemoveStemVirus : public std::exception {
     }
 };
 
-template<typename Virus>
-class Vertex
-{
-private:
-    std::shared_ptr<Virus> virus;
-public:
-
-    Vertex(Virus::id_type const &stem_id)
-    {
-        virus = std::make_shared<Virus>(stem_id);
-    }
-
-    std::shared_ptr<Virus> get_virus() {
-        return virus;
-    }
-
-    std::unordered_set<std::shared_ptr<Vertex<Virus>>> children;
-    std::unordered_set<std::shared_ptr<Vertex<Virus>>> parents;
-};
-
 template <typename Virus>
 class VirusGenealogy
 {
 public:
     VirusGenealogy(Virus::id_type const &stem_id)
     {
-        graph.insert({stem_id, std::make_shared<Vertex<Virus>>(stem_id)});
+        graph.insert({stem_id, std::make_shared<Vertex>(stem_id)});
         this->stem_id = stem_id;
     }
 
     ~VirusGenealogy() {
-        for (auto v : graph) {
+        for (auto v : this->graph) {
             v.second->children.clear();
             v.second->parents.clear();
         }
     }
+
+    class Vertex
+    {
+    private:
+        std::shared_ptr<Virus> virus;
+    public:
+
+        Vertex(Virus::id_type const &stem_id)
+        {
+            virus = std::make_shared<Virus>(stem_id);
+        }
+
+        std::shared_ptr<Virus> get_virus() {
+            return virus;
+        }
+
+        std::unordered_set<std::shared_ptr<Vertex>> children;
+        std::unordered_set<std::shared_ptr<Vertex>> parents;
+    };
 
     Virus::id_type get_stem_id() const { return stem_id; }
 
@@ -75,7 +74,7 @@ public:
         using reference         = const Virus&;
 
         children_iterator() = default;
-        explicit children_iterator(typename std::unordered_set<std::shared_ptr<Vertex<Virus>>>::iterator _it) {
+        explicit children_iterator(typename std::unordered_set<std::shared_ptr<Vertex>>::iterator _it) {
             it = _it;
         }
         reference operator*() const { return *((*it)->get_virus());}
@@ -87,7 +86,7 @@ public:
         friend bool operator== (const children_iterator& a, const children_iterator& b) { return a.it == b.it; };
         friend bool operator!= (const children_iterator& a, const children_iterator& b) { return a.it != b.it; };
     private:
-        typename std::unordered_set<std::shared_ptr<Vertex<Virus>>>::iterator it;
+        typename std::unordered_set<std::shared_ptr<Vertex>>::iterator it;
     };
 
     VirusGenealogy<Virus>::children_iterator get_children_begin(Virus::id_type const &id) const {
@@ -145,7 +144,7 @@ public:
         {
             throw VirusNotFound();
         }
-        graph.insert({id, std::make_shared<Vertex<Virus>>(id)});
+        graph.insert({id, std::make_shared<Vertex>(id)});
         connect(id, parent_id);
     }
 
@@ -162,7 +161,7 @@ public:
                 throw VirusNotFound();
             }
         }
-        graph.insert({id, std::make_shared<Vertex<Virus>>(id)});
+        graph.insert({id, std::make_shared<Vertex>(id)});
         for (auto parent_id: parent_ids)
         {
             connect(id, parent_id);
@@ -196,10 +195,10 @@ public:
 
 
 private:
-    std::unordered_map<typename Virus::id_type, std::shared_ptr<Vertex<Virus>>> graph;
+    std::unordered_map<typename Virus::id_type, std::shared_ptr<Vertex>> graph;
     typename Virus::id_type stem_id;
 
-    void remove_single_vertex(std::shared_ptr<Vertex<Virus>> vertex)
+    void remove_single_vertex(std::shared_ptr<Vertex> vertex)
     {
         for (auto parent: (vertex->parents))
         {
@@ -216,5 +215,4 @@ private:
         graph.erase(vertex->get_virus()->get_id());
     }
 };
-
 #endif
