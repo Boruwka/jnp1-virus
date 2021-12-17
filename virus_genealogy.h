@@ -25,8 +25,6 @@ public:
 
     ~VirusGenealogy() noexcept;
 
-    class Vertex;
-
     Virus::id_type get_stem_id() const { return stem_id; }
 
     VirusGenealogy(const VirusGenealogy &) = delete;
@@ -55,6 +53,7 @@ public:
     void remove(Virus::id_type const &id);
 
 private:
+    class Vertex;
     std::unordered_map<typename Virus::id_type, std::shared_ptr<Vertex>> graph;
     typename Virus::id_type stem_id;
 
