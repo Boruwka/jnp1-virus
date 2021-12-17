@@ -84,7 +84,7 @@ public:
         virus = std::make_shared<Virus>(stem_id);
     }
 
-    std::shared_ptr<Virus> get_virus() { return virus; }
+    std::shared_ptr<Virus> get_virus() const { return virus; }
 
     std::unordered_set<std::shared_ptr<Vertex>> children;
     std::unordered_set<std::shared_ptr<Vertex>> parents;
