@@ -193,6 +193,9 @@ void VirusGenealogy<Virus>::create(typename Virus::id_type const &id, typename V
 template <typename Virus>
 void VirusGenealogy<Virus>::create(typename Virus::id_type const &id,
                                    std::vector<typename Virus::id_type> const &parent_ids) {
+    if (parent_ids.empty())
+        return;
+
     if (exists(id)) {
         throw VirusAlreadyCreated();
     }
