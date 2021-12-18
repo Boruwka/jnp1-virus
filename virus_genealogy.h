@@ -3,7 +3,7 @@
 
 #include <iterator>
 #include <memory>
-#include <unordered_map>
+#include <map>
 #include <unordered_set>
 #include <vector>
 
@@ -53,8 +53,15 @@ public:
     void remove(Virus::id_type const &id);
 
 private:
+    struct ClassCompare
+    {
+        bool operator() (const Virus::id_type& lhs, const Virus::id_type& rhs) const
+        {
+            return lhs < rhs;
+        }
+    };
     class Vertex;
-    std::unordered_map<typename Virus::id_type, std::shared_ptr<Vertex>> graph;
+    std::map<typename Virus::id_type, std::shared_ptr<Vertex>, ClassCompare> graph;
     typename Virus::id_type stem_id;
 
     void remove_single_vertex(std::shared_ptr<Vertex> vertex);
