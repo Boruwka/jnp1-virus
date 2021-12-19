@@ -185,7 +185,8 @@ VirusGenealogy<Virus>::get_parents(typename Virus::id_type const &id) const {
     }
     std::vector<typename Virus::id_type> parents_vector;
     for (auto parent : (graph.at(id).lock()->parents)) {
-        parents_vector.push_back((*parent.lock()->get_virus()).get_id());
+        if (parent.lock().get() != nullptr)
+            parents_vector.push_back((*parent.lock()->get_virus()).get_id());
     }
     return parents_vector;
 }
