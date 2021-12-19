@@ -87,6 +87,10 @@ public:
 
     struct ClassCompareWeak {
         bool operator() (const std::weak_ptr<Vertex>& lhs, const std::weak_ptr<Vertex>& rhs) const {
+            if (rhs.lock().get() == nullptr)
+                return false;
+            if (lhs.lock().get() == nullptr)
+                return true;
             return lhs.lock()->get_virus()->get_id() < rhs.lock()->get_virus()->get_id();
         }
     };
