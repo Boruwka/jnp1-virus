@@ -7,6 +7,7 @@
 #include <unordered_set>
 #include <set>
 #include <vector>
+#include <algorithm>
 
 struct VirusNotFound : public std::out_of_range {
     VirusNotFound() : std::out_of_range("VirusNotFound"){};
@@ -197,12 +198,20 @@ VirusGenealogy<Virus>::get_parents(typename Virus::id_type const &id) const {
 
 template <typename Virus>
 void VirusGenealogy<Virus>::create(typename Virus::id_type const &id, typename Virus::id_type const &parent_id) {
+
+    
+
     if (exists(id)) {
         throw VirusAlreadyCreated();
     }
     if (!exists(parent_id)) {
         throw VirusNotFound();
     }
+
+    if (id == parent_id) {
+            return;
+        }
+
     std::shared_ptr<Vertex> v_new = std::make_shared<Vertex>(id);
     std::weak_ptr<Vertex> weak = v_new;
     graph.insert({id, weak});
@@ -224,6 +233,10 @@ void VirusGenealogy<Virus>::create(typename Virus::id_type const &id,
                                    std::vector<typename Virus::id_type> const &parent_ids) {
     if (parent_ids.empty())
         return;
+
+    if (std::count(parent_ids.begin(), parent_ids.end(), id)) {
+        return;
+    }
 
     if (exists(id)) {
         throw VirusAlreadyCreated();
@@ -265,8 +278,16 @@ void VirusGenealogy<Virus>::connect(typename Virus::id_type const &child_id, typ
     }
     auto child_vertex = graph.at(child_id);
     auto parent_vertex = graph.at(parent_id);
-    child_vertex.lock()->parents.insert(parent_vertex);
-    parent_vertex.lock()->children.insert(child_vertex.lock());
+    try {
+        child_vertex.lock()->parents.insert(parent_vertex);
+        parent_vertex.lock()->children.insert(child_vertex.lock());
+    }
+    catch (const std::exception& ex)
+    {
+        child_vertex.lock()->parents.erase(parent_vertex);
+        parent_vertex.lock()->children.erase(child_vertex.lock());
+        throw;
+    }
 }
 
 template <typename Virus>
