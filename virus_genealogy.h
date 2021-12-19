@@ -207,8 +207,16 @@ void VirusGenealogy<Virus>::create(typename Virus::id_type const &id, typename V
     std::weak_ptr<Vertex> weak = v_new;
     graph.insert({id, weak});
     auto parent_vertex = graph.at(parent_id);
-    v_new->parents.insert(parent_vertex);
-    parent_vertex.lock()->children.insert(v_new);
+    try {
+        v_new->parents.insert(parent_vertex);
+        parent_vertex.lock()->children.insert(v_new);
+    }
+    catch (const std::exception& ex) {
+        graph.erase(id);
+        v_new->parents.erase(parent_vertex);
+        parent_vertex.lock()->children.erase(v_new);
+        throw;
+    }
 }
 
 template <typename Virus>
@@ -228,10 +236,22 @@ void VirusGenealogy<Virus>::create(typename Virus::id_type const &id,
     std::shared_ptr<Vertex> v_new = std::make_shared<Vertex>(id);
     std::weak_ptr<Vertex> weak = v_new;
     graph.insert({id, weak});
-    for (auto parent_id : parent_ids) {
-        auto parent_vertex = graph.at(parent_id);
-        v_new->parents.insert(parent_vertex);
-        parent_vertex.lock()->children.insert(v_new);
+    try {
+        for (auto parent_id : parent_ids) {
+            auto parent_vertex = graph.at(parent_id);
+            v_new->parents.insert(parent_vertex);
+            parent_vertex.lock()->children.insert(v_new);
+        }
+    }
+    catch (const std::exception& ex)
+    {      
+        graph.erase(id);  
+        for (auto parent_id : parent_ids) {
+            auto parent_vertex = graph.at(parent_id);
+            v_new->parents.erase(parent_vertex);
+            parent_vertex.lock()->children.erase(v_new);
+        }
+        throw;
     }
 }
 
